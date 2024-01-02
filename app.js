@@ -3,6 +3,14 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const expressSession = require('express-session'); //can save data of user so he can  remain logged in
+const passport = require('passport');
+const EventEmitter = require('events');
+
+
+// Increase the limit for maximum listeners for all EventEmitters globally to 15
+require('events').EventEmitter.defaultMaxListeners = 15;
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -12,6 +20,20 @@ var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
+
+
+//Authorization and Authentication
+app.use(expressSession({  //for data holding and saving
+  resave: false,
+  saveUninitialized: false,
+  secret: "secret"
+}));
+app.use(passport.initialize()); //initializiing passport (create protected routes)
+app.use(passport.session());    //passport session is started for saviing and holding data in server (loggedin)
+passport.serializeUser(usersRouter.serializeUser());
+passport.deserializeUser(usersRouter.deserializeUser());
+
+
 
 app.use(logger('dev'));
 app.use(express.json());
